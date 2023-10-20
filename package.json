@@ -1,0 +1,35 @@
+{
+  "name": "telegram-event-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf ./build",
+    "dev": "nodemon",
+    "start": "node build/src"
+  },
+  "keywords": [],
+  "author": "Stolyar100",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "@types/nodemon": "^1.19.2",
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
+    "nodemon": "^2.0.21",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.4.0",
+    "ts-dotenv": "^0.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@grammyjs/menu": "^1.2.1",
+    "@grammyjs/router": "^2.0.0",
+    "grammy": "^1.19.2"
+  }
+}
