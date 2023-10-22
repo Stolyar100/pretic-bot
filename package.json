@@ -28,6 +28,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@grammyjs/conversations": "^1.1.2",
     "@grammyjs/menu": "^1.2.1",
     "@grammyjs/router": "^2.0.0",
     "grammy": "^1.19.2"
