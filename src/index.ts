@@ -1,15 +1,38 @@
 import { env, loadEnv } from './config/env.js'
 loadEnv()
-import { Bot } from 'grammy'
-import { MainMenuModule } from './modules/main-menu-module.js'
+import { Bot, BotError, GrammyError, HttpError, session } from 'grammy'
+import { conversations } from '@grammyjs/conversations'
+import { MainMenuModule } from './modules/main-menu/main-menu-module.js'
+import { AuthModule } from './modules/auth/auth-module.js'
+import { PretikContext } from './types/index.js'
+import { OfferModule } from './modules/offer/offer-module.js'
 
 const { BOT_TOKEN } = env
 
-const pretikBot = new Bot(BOT_TOKEN)
+const pretikBot = new Bot<PretikContext>(BOT_TOKEN)
+
+const errorHandler = (err: BotError) => {
+  const ctx = err.ctx
+  console.error(`Error while handling update ${ctx.update.update_id}:`)
+  const e = err.error
+  if (e instanceof GrammyError) {
+    console.error('Error in request:', e.description)
+  } else if (e instanceof HttpError) {
+    console.error('Could not contact Telegram:', e)
+  } else {
+    console.error('Unknown error:', e)
+  }
+}
+
+pretikBot.catch((err: BotError) => errorHandler(err))
+
+pretikBot.use(session({ initial: () => ({ employeeData: {} }) }))
+pretikBot.use(conversations())
 
 pretikBot.use(MainMenuModule)
+pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(AuthModule)
+pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(OfferModule)
 
-pretikBot.command('start', (ctx) => ctx.reply('Hello World'))
-pretikBot.on('message', (ctx) => ctx.reply('Ну ти страшний спеціаліст, Міша!'))
+pretikBot.command('id', (ctx) => ctx.reply(`${ctx.from?.id}`))
 
-pretikBot.start()
+void pretikBot.start()
