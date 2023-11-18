@@ -1,19 +1,10 @@
-import {
-  Conversation,
-  ConversationFlavor,
-  conversations,
-  createConversation,
-} from '@grammyjs/conversations'
-import { Composer, Context, session } from 'grammy'
+import { createConversation } from '@grammyjs/conversations'
+import { Composer } from 'grammy'
 import {
   cancelButtonText,
   handleOfferConversation,
 } from './offer-controller.js'
-import {
-  MainMenuModule,
-  menuKeyboardLabels,
-  sendMenu,
-} from '../main-menu/main-menu-module.js'
+import { menuKeyboardLabels, sendMenu } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
 
 const OfferModule = new Composer<PretikContext>()

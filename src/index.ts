@@ -26,7 +26,14 @@ const errorHandler = (err: BotError) => {
 
 pretikBot.catch((err: BotError) => errorHandler(err))
 
-pretikBot.use(session({ initial: () => ({ employeeData: {} }) }))
+pretikBot.use(
+  session({
+    initial: () => ({
+      employeeData: {},
+      offerDraft: {},
+    }),
+  })
+)
 pretikBot.use(conversations())
 
 pretikBot.use(MainMenuModule)

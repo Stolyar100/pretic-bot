@@ -19,9 +19,9 @@ interface employeeData {
 }
 
 interface OfferDraft {
-  shortName: string
-  reasons: string
-  content: string
-  solvesProblem: string
-  responsibleDepartment: string
+  shortName: string | null
+  reasons: string | null
+  content: string | null
+  solvesProblem: string | null
+  responsibleDepartment: string | null
 }
