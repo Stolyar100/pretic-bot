@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres
+    restart: always
+    container_name: postgres
+    environment:
+      POSTGRES_USER: pretik
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: PretikDev
+    ports:
+      - "5432:5432"
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8881:8080
+
+
