@@ -15,6 +15,7 @@
   "type": "module",
   "prisma": {
     "schema": "src/prisma/schema.prisma",
+    "seed": "node build/src/prisma/seed.js"
   },
   "devDependencies": {
     "@types/node": "^18.15.3",
