@@ -1,6 +1,6 @@
 import { env, loadEnv } from './config/env.js'
 loadEnv()
-import { Bot, BotError, GrammyError, HttpError, session } from 'grammy'
+import { Bot, BotError, session } from 'grammy'
 import { conversations } from '@grammyjs/conversations'
 import { MainMenuModule } from './modules/main-menu/main-menu-module.js'
 import { AuthModule } from './modules/auth/auth-module.js'
@@ -24,8 +24,10 @@ pretikBot.use(
 )
 pretikBot.use(conversations())
 
-pretikBot.use(MainMenuModule)
 pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(AuthModule)
+pretikBot
+  .errorBoundary((err: BotError) => errorHandler(err))
+  .use(MainMenuModule)
 pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(OfferModule)
 
 pretikBot.command('id', (ctx) => ctx.reply(`${ctx.from?.id}`))
