@@ -9,9 +9,4 @@ AuthModule.use(createConversation(register, {}))
 
 AuthModule.use(authentication)
 
-// AuthModule.command('start', async (ctx) => {
-
-//   await ctx.conversation.enter(register.name)
-// })
-
 export { AuthModule }
