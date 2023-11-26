@@ -49,6 +49,17 @@ const selectOfferFieldKeyboard = Keyboard.from(
 )
   .resized()
   .toFlowed(2)
+
+export async function cancelOffer(ctx: PretikContext) {
+  await ctx.conversation.exit(handleOfferConversation.name)
+  await ctx.reply('Нє - то нє')
+  await sendMenu(ctx)
+}
+
+export async function startOffer(ctx: PretikContext) {
+  await ctx.conversation.enter(handleOfferConversation.name)
+}
+
 export async function handleOfferConversation(
   conversation: PretikConversation,
   ctx: PretikContext
