@@ -33,6 +33,7 @@ const cancelKeyboard = Keyboard.from(cancelButtonRow).resized()
 const editSubmitKeyboard = Keyboard.from([...editButtonRow, ...submitButtonRow])
   .resized()
   .toFlowed(2)
+  .append(cancelKeyboard)
 
 const offerDraftMap: PretikContext['session']['offerDraft'] = {
   content: 'Зміст',
@@ -49,6 +50,7 @@ const selectOfferFieldKeyboard = Keyboard.from(
 )
   .resized()
   .toFlowed(2)
+  .append(cancelKeyboard)
 
 export async function cancelOffer(ctx: PretikContext) {
   await ctx.conversation.exit(handleOfferConversation.name)
@@ -72,7 +74,6 @@ export async function handleOfferConversation(
     solvesProblem: null,
   }
   do {
-    console.log(ctx.session.offerDraft)
     if (!_isOfferFieldFilled(ctx, 'shortName')) {
       await _requestShortName(conversation, ctx)
     }
@@ -91,7 +92,7 @@ export async function handleOfferConversation(
     }
 
     await ctx.reply('Шо, полетіли?', {
-      reply_markup: editSubmitKeyboard.append(cancelKeyboard),
+      reply_markup: editSubmitKeyboard,
     })
     const editSubmitResponse = await conversation.form.select([
       editButtonText,
@@ -104,14 +105,10 @@ export async function handleOfferConversation(
 
     await _selectFieldToEdit(conversation, ctx)
   } while (!_isOfferFilled(ctx.session.offerDraft))
-  await ctx.reply(
-    'Дякую за те, що покращуєш PRET!' +
-      `${Object.assign(ctx.session.offerDraft).toString()}`
-  )
+
+  await ctx.reply('Дякую за те, що покращуєш PRET!')
+
   await sendMenu(ctx)
-  console.log(ctx.session.offerDraft)
-  console.log('employeeData')
-  console.log(ctx.session.employeeData)
 }
 
 function _isOfferFieldFilled(
@@ -141,8 +138,9 @@ async function _askValidShortName(
   ctx: PretikContext
 ): Promise<string> {
   try {
-    const shortName = (await conversation.waitFor('message:text')).message.text
-    return shortName
+    const shortName = await conversation.waitFor('message:text')
+
+    return shortNameSchema.parse(shortName.msg.text)
   } catch (error) {
     await ctx.reply('Я ж просив коротше!')
     return _askValidShortName(conversation, ctx)

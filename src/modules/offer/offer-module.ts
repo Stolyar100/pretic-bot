@@ -6,7 +6,7 @@ import {
   handleOfferConversation,
   startOffer,
 } from './offer-controller.js'
-import { menuKeyboardLabels, sendMenu } from '../main-menu/main-menu-module.js'
+import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
 
 const OfferModule = new Composer<PretikContext>()

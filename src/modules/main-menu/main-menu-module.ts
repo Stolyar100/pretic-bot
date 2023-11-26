@@ -1,4 +1,4 @@
-import { Composer, InlineKeyboard, Keyboard } from 'grammy'
+import { Composer } from 'grammy'
 import {
   mainMenuKeyboard,
   sendMenu,
