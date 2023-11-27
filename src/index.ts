@@ -17,7 +17,6 @@ pretikBot.catch((err: BotError) => errorHandler(err))
 pretikBot.use(
   session({
     initial: () => ({
-      employeeData: {},
       offerDraft: {},
     }),
   })

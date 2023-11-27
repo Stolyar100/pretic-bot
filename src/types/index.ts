@@ -8,14 +8,7 @@ export type PretikContext = Context &
 export type PretikConversation = Conversation<PretikContext>
 
 interface SessionData {
-  employeeData: employeeData
   offerDraft: OfferDraft
-}
-
-interface employeeData {
-  employeeId: string
-  employeeName: string
-  employeePhoneNumber: string
 }
 
 interface OfferDraft {
