@@ -2,6 +2,7 @@ import { Keyboard } from 'grammy'
 import { z } from 'zod'
 import { PretikContext, PretikConversation } from '../../types/index.js'
 import { sendMenu } from '../main-menu/main-menu-controller.js'
+import { prisma } from '../../prisma/client.js'
 
 const shortNameSchema = z.string().max(70)
 
@@ -52,6 +53,9 @@ const selectOfferFieldKeyboard = Keyboard.from(
   .toFlowed(2)
   .append(cancelKeyboard)
 
+const offerLimitWarning =
+  'Побійся Бога, пізніше побалакаєм! На сьогодні досить, продовжиш завтра, іди працюй'
+
 export async function cancelOffer(ctx: PretikContext) {
   await ctx.conversation.exit(handleOfferConversation.name)
   await ctx.reply('Нє - то нє')
@@ -59,6 +63,12 @@ export async function cancelOffer(ctx: PretikContext) {
 }
 
 export async function startOffer(ctx: PretikContext) {
+  const isLimitReached = await _isLimitReached(ctx.from?.id)
+  if (isLimitReached) {
+    await ctx.reply(offerLimitWarning)
+    return
+  }
+
   await ctx.conversation.enter(handleOfferConversation.name)
 }
 
@@ -207,4 +217,16 @@ async function _selectFieldToEdit(
   const fieldToEdit =
     fieldToEditKeyValue[0] as string as keyof PretikContext['session']['offerDraft']
   ctx.session.offerDraft[fieldToEdit] = null
+}
+export async function _isLimitReached(
+  userId: number | undefined
+): Promise<boolean> {
+  const todayOfferCount = await prisma.offer.count({
+    where: {
+      creationDate: new Date(),
+      authorId: userId,
+    },
+  })
+
+  return todayOfferCount > 2
 }
