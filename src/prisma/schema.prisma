@@ -23,6 +23,26 @@ model User {
   id                Int      @id @map("TelegramId")
   employeeTabNumber String   @unique @map("EmployeeTabNumber") @db.VarChar(4)
   employeeData      Employee @relation(fields: [employeeTabNumber], references: [tabNumber])
+  offers            Offer[]
 
   @@map("TGBotUser")
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+
+  @@map("TGBotOfferStatus")
+}
+
+model Offer {
+  id           Int         @id @default(autoincrement()) @map("Id")
+  shortName    String      @map("ShortName") @db.VarChar(70)
+  status       OfferStatus @default(PENDING) @map("Status")
+  Author       User        @relation(fields: [authorId], references: [id])
+  authorId     Int         @map("AuthorId")
+  creationDate DateTime    @default(now()) @map("CreationDate") @db.Date
+
+  @@map("TGBotOffer")
 }
