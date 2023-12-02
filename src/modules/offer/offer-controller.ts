@@ -119,6 +119,8 @@ export async function handleOfferConversation(
 
   await ctx.reply(_renderOfferMessage(ctx.session.offerDraft), {
     parse_mode: 'HTML',
+  })
+
   await ctx.reply('Дякую за те, що покращуєш PRET!')
 
   await sendMenu(ctx)
@@ -258,3 +260,5 @@ function _renderOfferMessage(
 }
 
 function _deleteCodeIndentation(text: string) {
+  return text.replace(/[^\S\r\n][^\S\r\n]+/g, '')
+}
