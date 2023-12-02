@@ -116,6 +116,9 @@ export async function handleOfferConversation(
     await _selectFieldToEdit(conversation, ctx)
   } while (!_isOfferFilled(ctx.session.offerDraft))
 
+
+  await ctx.reply(_renderOfferMessage(ctx.session.offerDraft), {
+    parse_mode: 'HTML',
   await ctx.reply('Дякую за те, що покращуєш PRET!')
 
   await sendMenu(ctx)
@@ -230,3 +233,28 @@ export async function _isLimitReached(
 
   return todayOfferCount > 2
 }
+
+function _renderOfferMessage(
+  offerDraft: PretikContext['session']['offerDraft']
+) {
+  const offerMessage = `
+    Пропозиція📥 
+
+    <b><i>${offerDraft.shortName}</i></b>
+
+    <b>Передумови/причини/обгрунтування:</b> 
+    ${offerDraft.reasons}
+
+    <b>Зміст:</b> 
+    ${offerDraft.content}
+    
+    <b>Яку проблему це вирішить або що покращить?:</b> 
+    ${offerDraft.solvesProblem}
+    
+    <b>Ну і в чий город цей камінь?:</b> 
+    ${offerDraft.responsibleDepartment}`
+
+  return _deleteCodeIndentation(offerMessage).trim()
+}
+
+function _deleteCodeIndentation(text: string) {
