@@ -17,4 +17,14 @@ OfferModule.use(createConversation(handleOfferConversation))
 
 OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
 
+OfferModule.on('callback_query:data', async (ctx, next) => {
+  const { data: rawData } = ctx.callbackQuery
+
+  try {
+    const data = JSON.parse(rawData)
+  } catch (e) {
+    await next()
+  }
+})
+
 export { OfferModule }
