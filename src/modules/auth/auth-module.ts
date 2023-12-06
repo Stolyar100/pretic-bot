@@ -7,6 +7,6 @@ const AuthModule = new Composer<PretikContext>()
 
 AuthModule.use(createConversation(register, {}))
 
-AuthModule.use(authentication)
+AuthModule.on(['message', 'callback_query', 'edit'], authentication)
 
 export { AuthModule }
