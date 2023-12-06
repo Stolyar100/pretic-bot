@@ -1,7 +1,11 @@
+import { env, loadEnv } from '../../config/env.js'
+loadEnv()
 import { Keyboard, NextFunction } from 'grammy'
 import { PretikConversation, PretikContext } from '../../types/index.js'
 import { sendMenu } from '../main-menu/main-menu-controller.js'
 import { prisma } from '../../prisma/client.js'
+
+const { ADMIN_TAB_NUMBER } = env
 
 const shareNumberKeyboard = new Keyboard()
   .requestContact('Поділитись номером')
@@ -16,14 +20,22 @@ export async function authentication(ctx: PretikContext, next: NextFunction) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { employeeData: true },
   })
 
   if (!user) {
     await ctx.conversation.enter(register.name)
+    return
   }
 
+  ctx.session.auth = { user: user, isAdmin: _isAdmin(user.employeeTabNumber) }
   await next()
+}
+
+function _isAdmin(
+  tabNumber: PretikContext['session']['auth']['user']['employeeTabNumber']
+): boolean {
+  const isAdmin = tabNumber == ADMIN_TAB_NUMBER
+  return isAdmin
 }
 
 export async function register(
@@ -38,22 +50,22 @@ export async function register(
   )
 
   await ctx.reply('Залиш свій табельний номер!')
-  const employeeIdUpdate = await conversation.waitFor('message:text')
+  const employeeTabNumberUpdate = await conversation.waitFor('message:text')
 
-  const userTelegramId = employeeIdUpdate.msg.from.id
-  let employeeId = employeeIdUpdate.msg.text
+  const userTelegramId = employeeTabNumberUpdate.msg.from.id
+  let employeeTabNumber = employeeTabNumberUpdate.msg.text
   let employeeName: string | undefined = ''
 
   while (!employeeName) {
     employeeName = await conversation.external(() =>
-      _getUnregisteredEmployee(employeeId).then(
+      _getUnregisteredEmployee(employeeTabNumber).then(
         (employee) => employee?.fullName
       )
     )
 
     if (!employeeName) {
       await ctx.reply('Ах, шахрай! Спробуй ще раз!')
-      employeeId = (await conversation.waitFor('message:text')).msg.text
+      employeeTabNumber = (await conversation.waitFor('message:text')).msg.text
       continue
     }
   }
@@ -68,16 +80,16 @@ export async function register(
   const { phone_number: phoneNumber } = contactMessage.msg.contact
 
   await conversation.external(() =>
-    _registerUser(userTelegramId, employeeId, phoneNumber)
+    _registerUser(userTelegramId, employeeTabNumber, phoneNumber)
   )
 
   await sendMenu(ctx)
 }
 
-async function _getUnregisteredEmployee(employeeId: string) {
+async function _getUnregisteredEmployee(employeeTabNumber: string) {
   const employee = await prisma.employee.findUnique({
     where: {
-      tabNumber: employeeId,
+      tabNumber: employeeTabNumber,
       telegramUser: null,
     },
   })
