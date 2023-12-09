@@ -1,5 +1,6 @@
-import { Keyboard } from 'grammy'
+import { InlineKeyboard, Keyboard } from 'grammy'
 import { PretikContext } from '../../types/index.js'
+import { offerMenuData } from './offer-controller.js'
 const departments = [
   'ІТ',
   'Маркетинг',
@@ -78,4 +79,33 @@ export function _renderOfferMessage(
 
 function _deleteCodeIndentation(text: string) {
   return text.replace(/[^\S\r\n][^\S\r\n]+/g, '')
+}
+
+export const offerNotFoundText = 'Йой, нема такої пропозиції на розгляді'
+export const offerAcceptedText = 'Файно є, публікуєм'
+export const offerRejectedText = 'Йой, геть тото'
+
+const offerAcceptText = 'Публікувати'
+const offerRejectText = 'Відхилити'
+
+export function _generateOfferInline(offerId: offerMenuData['id']) {
+  const acceptData: offerMenuData = {
+    id: offerId,
+    name: 'OfferStatus',
+    action: 'ACCEPT',
+  }
+  const rejectData: offerMenuData = {
+    id: offerId,
+    name: 'OfferStatus',
+    action: 'REJECT',
+  }
+
+  const acceptButtonPayload = JSON.stringify(acceptData)
+  const rejectButtonPayload = JSON.stringify(rejectData)
+
+  const offerInlineKeyboard = new InlineKeyboard()
+    .text(offerAcceptText, acceptButtonPayload)
+    .text(offerRejectText, rejectButtonPayload)
+
+  return offerInlineKeyboard
 }
