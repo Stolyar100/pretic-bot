@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth-module.js'
 import { PretikContext } from './types/index.js'
 import { OfferModule } from './modules/offer/offer-module.js'
 import { errorHandler } from './helpers/errorHandler.js'
+import { hydrate } from '@grammyjs/hydrate'
 
 const { BOT_TOKEN } = env
 
@@ -21,6 +22,7 @@ pretikBot.use(
     }),
   })
 )
+pretikBot.use(hydrate())
 pretikBot.use(conversations())
 
 pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(AuthModule)
