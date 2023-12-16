@@ -1,7 +1,7 @@
 import { Conversation, ConversationFlavor } from '@grammyjs/conversations'
 import { HydrateFlavor } from '@grammyjs/hydrate'
+import { User } from '@prisma/client'
 import { Context, SessionFlavor } from 'grammy'
-import type { User } from '.prisma/client'
 
 export type PretikContext = HydrateFlavor<
   Context & ConversationFlavor & SessionFlavor<SessionData>
