@@ -3,7 +3,7 @@ loadEnv()
 import { InlineKeyboard, Keyboard } from 'grammy'
 import { PretikContext } from '../../types/index.js'
 
-const { CHANNEL_URL } = env
+const { CHANNEL_INVITE_URL } = env
 
 export const menuKeyboardLabels = {
   sendOffer: 'Запропонувати 📥',
@@ -12,7 +12,10 @@ export const menuKeyboardLabels = {
   goToChannel: 'Глипнути на канал 👀',
 }
 
-export const visitChannelInline = new InlineKeyboard().url('Тицяй', CHANNEL_URL)
+export const visitChannelInline = new InlineKeyboard().url(
+  'Тицяй',
+  CHANNEL_INVITE_URL
+)
 
 export const mainMenuKeyboard = new Keyboard()
   .text(menuKeyboardLabels.sendOffer)

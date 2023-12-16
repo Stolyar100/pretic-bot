@@ -4,10 +4,12 @@ import {
   cancelButtonText,
   cancelOffer,
   handleOfferConversation,
+  handleOfferCallback,
   startOffer,
 } from './offer-controller.js'
 import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
+import { channel } from 'diagnostics_channel'
 
 const OfferModule = new Composer<PretikContext>()
 
@@ -17,14 +19,6 @@ OfferModule.use(createConversation(handleOfferConversation))
 
 OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
 
-OfferModule.on('callback_query:data', async (ctx, next) => {
-  const { data: rawData } = ctx.callbackQuery
-
-  try {
-    const data = JSON.parse(rawData)
-  } catch (e) {
-    await next()
-  }
-})
+OfferModule.on('callback_query:data', handleOfferCallback)
 
 export { OfferModule }

@@ -109,3 +109,5 @@ export function _generateOfferInline(offerId: offerMenuData['id']) {
 
   return offerInlineKeyboard
 }
+
+export const requiresAdminText = 'А ти точно адмін?'

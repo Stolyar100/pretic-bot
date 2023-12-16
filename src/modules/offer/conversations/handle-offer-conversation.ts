@@ -1,3 +1,5 @@
+import { env, loadEnv } from '../../../config/env.js'
+loadEnv()
 import { prisma } from '../../../prisma/client.js'
 import { PretikContext, PretikConversation } from '../../../types/index.js'
 import { z } from 'zod'
@@ -12,7 +14,11 @@ import {
   offerDraftMap,
   offerFieldLabels,
   selectOfferFieldKeyboard,
+  _generateOfferInline,
 } from '../responses.js'
+
+const { ADMIN_TAB_NUMBER } = env
+
 const shortNameSchema = z.string().max(70)
 
 export async function handleOfferConversation(
@@ -59,9 +65,36 @@ export async function handleOfferConversation(
     await _selectFieldToEdit(conversation, ctx)
   } while (!_isOfferFilled(ctx.session.offerDraft))
 
-  await ctx.reply(_renderOfferMessage(ctx.session.offerDraft), {
-    parse_mode: 'HTML',
-  })
+  const shortName = ctx.session.offerDraft.shortName
+  const authorId = ctx.from?.id
+
+  if (shortName && authorId) {
+    const createdOffer = await conversation.external(() =>
+      prisma.offer.create({
+        data: {
+          shortName,
+          authorId,
+        },
+      })
+    )
+
+    const adminId = await conversation.external(() =>
+      _getAdminId(ADMIN_TAB_NUMBER)
+    )
+
+    if (!adminId) {
+      return await ctx.reply('Біда: адмін не реєструвався')
+    }
+
+    await ctx.api.sendMessage(
+      adminId,
+      _renderOfferMessage(ctx.session.offerDraft),
+      {
+        parse_mode: 'HTML',
+        reply_markup: _generateOfferInline(createdOffer.id),
+      }
+    )
+  }
 
   await ctx.reply('Дякую за те, що покращуєш PRET!')
 
@@ -164,4 +197,13 @@ async function _selectFieldToEdit(
   const fieldToEdit =
     fieldToEditKeyValue[0] as string as keyof PretikContext['session']['offerDraft']
   ctx.session.offerDraft[fieldToEdit] = null
+}
+
+async function _getAdminId(adminTabNumber: string) {
+  const admin = await prisma.user.findUnique({
+    where: { employeeTabNumber: adminTabNumber },
+    select: { id: true },
+  })
+
+  return admin?.id
 }

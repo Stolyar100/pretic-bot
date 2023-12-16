@@ -1,10 +1,31 @@
+import { env, loadEnv } from '../../config/env.js'
+loadEnv()
+import { Filter, NextFunction } from 'grammy'
+import { ZodError, z } from 'zod'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js'
 import { PretikContext } from '../../types/index.js'
 import { sendMenu } from '../main-menu/main-menu-controller.js'
 import { prisma } from '../../prisma/client.js'
 import { handleOfferConversation } from './conversations/handle-offer-conversation.js'
-import { offerLimitWarning } from './responses.js'
+import {
+  offerAcceptedText,
+  offerLimitWarning,
+  offerNotFoundText,
+  offerRejectedText,
+  requiresAdminText,
+} from './responses.js'
 export { cancelButtonText } from './responses.js'
 export { handleOfferConversation } from './conversations/handle-offer-conversation.js'
+
+const { CHANNEL_ID } = env
+
+const offerMenuSchema = z.object({
+  name: z.literal('OfferStatus'),
+  id: z.number(),
+  action: z.enum(['REJECT', 'ACCEPT']),
+})
+
+export type offerMenuData = z.infer<typeof offerMenuSchema>
 
 export async function cancelOffer(ctx: PretikContext) {
   await ctx.conversation.exit(handleOfferConversation.name)
@@ -31,4 +52,54 @@ async function _isLimitReached(userId: number | undefined): Promise<boolean> {
   })
 
   return todayOfferCount > 2
+}
+
+export async function handleOfferCallback(
+  ctx: Filter<PretikContext, 'callback_query:data'>,
+  next: NextFunction
+) {
+  try {
+    const { data: rawData } = ctx.callbackQuery
+    const { id, action } = await _parseOfferData(rawData)
+    const { isAdmin } = ctx.session.auth
+
+    if (!isAdmin) {
+      await ctx.answerCallbackQuery(requiresAdminText)
+      return
+    }
+
+    if (action == 'ACCEPT') {
+      const updatedOffer = await prisma.offer.update({
+        where: { id: id, status: 'PENDING' },
+        data: { status: 'ACCEPTED' },
+      })
+
+      await ctx.copyMessage(CHANNEL_ID)
+
+      await ctx.answerCallbackQuery(offerAcceptedText)
+    }
+    if (action == 'REJECT') {
+      const updatedOffer = await prisma.offer.update({
+        where: { id: id, status: 'PENDING' },
+        data: { status: 'REJECTED' },
+      })
+
+      await ctx.answerCallbackQuery(offerRejectedText)
+    }
+    await ctx.msg?.delete()
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return await next()
+    }
+    if (e instanceof PrismaClientKnownRequestError && e.code == 'P2025') {
+      return await ctx.answerCallbackQuery(offerNotFoundText)
+    }
+    throw e
+  }
+}
+
+async function _parseOfferData(offerPayload: string) {
+  const parsedPayload = JSON.parse(offerPayload)
+  const offerData = offerMenuSchema.parse(parsedPayload)
+  return offerData
 }
