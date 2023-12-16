@@ -31,6 +31,6 @@ pretikBot
   .use(MainMenuModule)
 pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(OfferModule)
 
-pretikBot.command('id', (ctx) => ctx.reply(`${ctx.from?.id}`))
+pretikBot.command('id', (ctx) => ctx.reply(`${JSON.stringify(ctx.chat)}`))
 
 void pretikBot.start()
