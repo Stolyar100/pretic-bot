@@ -14,8 +14,8 @@ const shareNumberKeyboard = new Keyboard()
 export async function authentication(ctx: PretikContext, next: NextFunction) {
   const userId = ctx.from?.id
 
-  if (!userId) {
-    await next()
+  if (!userId || _isUserAuthorized(ctx.session.auth)) {
+    return await next()
   }
 
   const user = await prisma.user.findUnique({
@@ -29,6 +29,14 @@ export async function authentication(ctx: PretikContext, next: NextFunction) {
 
   ctx.session.auth = { user: user, isAdmin: _isAdmin(user.employeeTabNumber) }
   await next()
+}
+
+function _isUserAuthorized(
+  authSessionData: PretikContext['session']['auth']
+): boolean {
+  const isUserAuthorized = !!authSessionData
+
+  return isUserAuthorized
 }
 
 function _isAdmin(
