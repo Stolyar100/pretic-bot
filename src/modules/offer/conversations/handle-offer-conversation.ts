@@ -90,7 +90,7 @@ export async function handleOfferConversation(
     return await ctx.reply('Біда: адмін не реєструвався')
   }
 
-  await ctx.api.sendMessage(
+  const offerMessage = await ctx.api.sendMessage(
     adminId,
     _renderOfferMessage(ctx.session.offerDraft),
     {
@@ -98,7 +98,10 @@ export async function handleOfferConversation(
       reply_markup: _generateOfferInline(createdOffer.id),
     }
   )
-  await ctx.api.sendContact(adminId, phone || '', fullName)
+  await ctx.api.sendContact(adminId, phone || '', fullName, {
+    reply_to_message_id: offerMessage.message_id,
+    disable_notification: true,
+  })
 
   await ctx.reply('Дякую за те, що покращуєш PRET!')
 
