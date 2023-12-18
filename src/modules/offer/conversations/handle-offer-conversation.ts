@@ -68,33 +68,37 @@ export async function handleOfferConversation(
   const shortName = ctx.session.offerDraft.shortName
   const authorId = ctx.from?.id
 
-  if (shortName && authorId) {
-    const createdOffer = await conversation.external(() =>
-      prisma.offer.create({
-        data: {
-          shortName,
-          authorId,
-        },
-      })
-    )
-
-    const adminId = await conversation.external(() =>
-      _getAdminId(ADMIN_TAB_NUMBER)
-    )
-
-    if (!adminId) {
-      return await ctx.reply('Біда: адмін не реєструвався')
-    }
-
-    await ctx.api.sendMessage(
-      adminId,
-      _renderOfferMessage(ctx.session.offerDraft),
-      {
-        parse_mode: 'HTML',
-        reply_markup: _generateOfferInline(createdOffer.id),
-      }
-    )
+  if (!shortName || !authorId) {
+    return await ctx.reply('Шось не так')
   }
+
+  const createdOffer = await conversation.external(() =>
+    prisma.offer.create({
+      data: {
+        shortName,
+        authorId,
+      },
+    })
+  )
+
+  const adminId = await conversation.external(() =>
+    _getAdminId(ADMIN_TAB_NUMBER)
+  )
+  const { fullName, phone } = ctx.session.auth.user.employeeData
+
+  if (!adminId) {
+    return await ctx.reply('Біда: адмін не реєструвався')
+  }
+
+  await ctx.api.sendMessage(
+    adminId,
+    _renderOfferMessage(ctx.session.offerDraft),
+    {
+      parse_mode: 'HTML',
+      reply_markup: _generateOfferInline(createdOffer.id),
+    }
+  )
+  await ctx.api.sendContact(adminId, phone || '', fullName)
 
   await ctx.reply('Дякую за те, що покращуєш PRET!')
 
