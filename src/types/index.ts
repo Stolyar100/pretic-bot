@@ -1,6 +1,6 @@
 import { Conversation, ConversationFlavor } from '@grammyjs/conversations'
 import { HydrateFlavor } from '@grammyjs/hydrate'
-import { User } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { Context, SessionFlavor } from 'grammy'
 
 export type PretikContext = HydrateFlavor<
@@ -15,7 +15,7 @@ interface SessionData {
 }
 
 interface Auth {
-  user: User
+  user: Prisma.UserGetPayload<{ include: { employeeData: true } }>
   isAdmin: boolean
 }
 

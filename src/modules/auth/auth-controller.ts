@@ -20,6 +20,7 @@ export async function authentication(ctx: PretikContext, next: NextFunction) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
+    include: { employeeData: true },
   })
 
   if (!user) {
