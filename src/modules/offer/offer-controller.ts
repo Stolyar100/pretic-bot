@@ -86,7 +86,7 @@ export async function handleOfferCallback(
 
       await ctx.answerCallbackQuery(offerRejectedText)
     }
-    await ctx.msg?.delete()
+    await ctx.msg?.editReplyMarkup()
   } catch (e) {
     if (e instanceof ZodError) {
       return await next()
