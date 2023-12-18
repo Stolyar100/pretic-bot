@@ -1,3 +1,5 @@
+import { env, loadEnv } from '../../config/env.js'
+loadEnv()
 import { createConversation } from '@grammyjs/conversations'
 import { Composer } from 'grammy'
 import {
@@ -9,13 +11,18 @@ import {
 } from './offer-controller.js'
 import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
-import { channel } from 'diagnostics_channel'
+
+const { CONVERSATION_TIMEOUT } = env
 
 const OfferModule = new Composer<PretikContext>()
 
 OfferModule.hears(cancelButtonText, cancelOffer)
 
-OfferModule.use(createConversation(handleOfferConversation))
+OfferModule.use(
+  createConversation(handleOfferConversation, {
+    maxMillisecondsToWait: CONVERSATION_TIMEOUT,
+  })
+)
 
 OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
 
