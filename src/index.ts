@@ -8,6 +8,7 @@ import { PretikContext } from './types/index.js'
 import { OfferModule } from './modules/offer/offer-module.js'
 import { errorHandler } from './helpers/errorHandler.js'
 import { hydrate } from '@grammyjs/hydrate'
+import { FileAdapter } from '@grammyjs/storage-file'
 
 const { BOT_TOKEN } = env
 
@@ -15,8 +16,11 @@ const pretikBot = new Bot<PretikContext>(BOT_TOKEN)
 
 pretikBot.catch((err: BotError) => errorHandler(err))
 
+const fileStorage = new FileAdapter({ dirName: 'sessions' })
+
 pretikBot.use(
   session({
+    storage: fileStorage,
     initial: () => ({
       offerDraft: {},
     }),
