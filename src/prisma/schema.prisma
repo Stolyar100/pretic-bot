@@ -13,6 +13,7 @@ datasource db {
 model Employee {
   tabNumber    String  @id @map("TabNumber") @db.VarChar(4)
   fullName     String  @map("FullName")
+  isAdmin      Boolean @default(false) @map("IsAdmin")
   phone        String? @map("Phone")
   telegramUser User?
 
