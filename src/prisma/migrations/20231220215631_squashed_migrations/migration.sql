@@ -5,6 +5,7 @@ CREATE TYPE "TGBotOfferStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
 CREATE TABLE "TGBotEmployee" (
     "TabNumber" VARCHAR(4) NOT NULL,
     "FullName" TEXT NOT NULL,
+    "IsAdmin" BOOLEAN NOT NULL DEFAULT false,
     "Phone" TEXT,
 
     CONSTRAINT "TGBotEmployee_pkey" PRIMARY KEY ("TabNumber")
