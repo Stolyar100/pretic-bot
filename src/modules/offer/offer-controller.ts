@@ -8,6 +8,7 @@ import { sendMenu } from '../main-menu/main-menu-controller.js'
 import { prisma } from '../../prisma/client.js'
 import { handleOfferConversation } from './conversations/handle-offer-conversation.js'
 import {
+  _generateStatistic,
   offerAcceptedText,
   offerLimitWarning,
   offerNotFoundText,
@@ -102,4 +103,28 @@ async function _parseOfferData(offerPayload: string) {
   const parsedPayload = JSON.parse(offerPayload)
   const offerData = offerMenuSchema.parse(parsedPayload)
   return offerData
+}
+
+export async function getStatistic(ctx: PretikContext) {
+  const { id } = ctx.session.auth.user
+
+  const offerGroupsCount = await prisma.offer.groupBy({
+    where: { authorId: id },
+    by: ['status'],
+    _count: { _all: true },
+  })
+
+  const pendingCount = offerGroupsCount.find(
+    (offerGroup) => offerGroup.status == 'PENDING'
+  )?._count._all
+  const rejectedCount = offerGroupsCount.find(
+    (offerGroup) => offerGroup.status == 'REJECTED'
+  )?._count._all
+  const acceptedCount = offerGroupsCount.find(
+    (offerGroup) => offerGroup.status == 'ACCEPTED'
+  )?._count._all
+
+  await ctx.reply(
+    _generateStatistic(pendingCount, rejectedCount, acceptedCount)
+  )
 }

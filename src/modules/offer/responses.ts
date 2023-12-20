@@ -1,6 +1,7 @@
 import { InlineKeyboard, Keyboard } from 'grammy'
 import { PretikContext } from '../../types/index.js'
 import { offerMenuData } from './offer-controller.js'
+import { Prisma } from '@prisma/client'
 const departments = [
   'ІТ',
   'Маркетинг',
@@ -111,3 +112,11 @@ export function _generateOfferInline(offerId: offerMenuData['id']) {
 }
 
 export const requiresAdminText = 'А ти точно адмін?'
+
+export function _generateStatistic(
+  pendingCount = 0,
+  rejectedCount = 0,
+  acceptedCount = 0
+) {
+  return `На розгляді 🔄: ${pendingCount} \nПрийнято ✅: ${acceptedCount} \nВідхилено ❌: ${rejectedCount}`
+}

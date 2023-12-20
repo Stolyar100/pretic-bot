@@ -8,6 +8,7 @@ import {
   handleOfferConversation,
   handleOfferCallback,
   startOffer,
+  getStatistic,
 } from './offer-controller.js'
 import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
@@ -25,6 +26,7 @@ OfferModule.use(
 )
 
 OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
+OfferModule.hears(menuKeyboardLabels.getStatistic, getStatistic)
 
 OfferModule.on('callback_query:data', handleOfferCallback)
 
