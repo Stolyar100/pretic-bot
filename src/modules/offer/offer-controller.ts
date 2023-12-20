@@ -9,16 +9,23 @@ import { prisma } from '../../prisma/client.js'
 import { handleOfferConversation } from './conversations/handle-offer-conversation.js'
 import {
   _generateStatistic,
+  _generateStatus,
   offerAcceptedText,
   offerLimitWarning,
   offerNotFoundText,
   offerRejectedText,
   requiresAdminText,
 } from './responses.js'
+import {
+  _countOffers,
+  _getStatus,
+  offerStatusMenu,
+} from './menus/status-menu.js'
 export { cancelButtonText } from './responses.js'
 export { handleOfferConversation } from './conversations/handle-offer-conversation.js'
+export { offerStatusMenu } from './menus/status-menu.js'
 
-const { CHANNEL_ID } = env
+const { CHANNEL_ID, OFFER_PER_PAGE } = env
 
 const offerMenuSchema = z.object({
   name: z.literal('OfferStatus'),
@@ -127,4 +134,26 @@ export async function getStatistic(ctx: PretikContext) {
   await ctx.reply(
     _generateStatistic(pendingCount, rejectedCount, acceptedCount)
   )
+}
+
+export async function sendStatusMenu(ctx: PretikContext) {
+  const { id } = ctx.session.auth.user
+  const [offersCount, firstStatusPage] = await Promise.all([
+    _countOffers(id),
+    _getStatus(id, 0, OFFER_PER_PAGE),
+  ])
+  const pagesCount = calcPagesCount(offersCount, OFFER_PER_PAGE)
+
+  ctx.session.offerStatus = {
+    offersPerPage: OFFER_PER_PAGE,
+    page: 0,
+    pagesCount: pagesCount,
+  }
+  const statusMessage = _generateStatus(firstStatusPage, 0, pagesCount)
+  return await ctx.reply(statusMessage, { reply_markup: offerStatusMenu })
+}
+
+function calcPagesCount(offersCount: number, offersPerPage: number) {
+  const pagesCount = Math.ceil(offersCount / offersPerPage)
+  return pagesCount
 }

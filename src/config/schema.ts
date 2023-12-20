@@ -5,6 +5,7 @@ const schema = {
   CHANNEL_ID: Number,
   ADMIN_TAB_NUMBER: String,
   CONVERSATION_TIMEOUT: { type: Number, default: 5 * 60 * 1000 },
+  OFFER_PER_PAGE: { type: Number, default: 5 },
 } as const
 
 export default schema

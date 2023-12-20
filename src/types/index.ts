@@ -12,6 +12,7 @@ export type PretikConversation = Conversation<PretikContext>
 interface SessionData {
   auth: Auth
   offerDraft: OfferDraft
+  offerStatus: OfferStatusMenu
 }
 
 interface Auth {
@@ -25,4 +26,10 @@ interface OfferDraft {
   content: string | null
   solvesProblem: string | null
   responsibleDepartment: string | null
+}
+
+interface OfferStatusMenu {
+  offersPerPage: number
+  page: number
+  pagesCount: number
 }

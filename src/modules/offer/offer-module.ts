@@ -9,9 +9,11 @@ import {
   handleOfferCallback,
   startOffer,
   getStatistic,
+  sendStatusMenu,
 } from './offer-controller.js'
 import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
+import { offerStatusMenu } from './offer-controller.js'
 
 const { CONVERSATION_TIMEOUT } = env
 
@@ -25,8 +27,11 @@ OfferModule.use(
   })
 )
 
+OfferModule.use(offerStatusMenu)
+
 OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
 OfferModule.hears(menuKeyboardLabels.getStatistic, getStatistic)
+OfferModule.hears(menuKeyboardLabels.getStatus, sendStatusMenu)
 
 OfferModule.on('callback_query:data', handleOfferCallback)
 

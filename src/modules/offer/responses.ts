@@ -1,7 +1,7 @@
 import { InlineKeyboard, Keyboard } from 'grammy'
 import { PretikContext } from '../../types/index.js'
 import { offerMenuData } from './offer-controller.js'
-import { Prisma } from '@prisma/client'
+import { OfferStatus, Prisma } from '@prisma/client'
 const departments = [
   'ІТ',
   'Маркетинг',
@@ -119,4 +119,36 @@ export function _generateStatistic(
   acceptedCount = 0
 ) {
   return `На розгляді 🔄: ${pendingCount} \nПрийнято ✅: ${acceptedCount} \nВідхилено ❌: ${rejectedCount}`
+}
+
+export const offerPreviousText = '⬅️ Назад'
+export const offerNextText = 'Вперед ➡️'
+export const offerCloseText = 'Закрити ❌'
+export const paginationLimitText = 'Чшшш, тихо'
+
+const OfferMenuStatusText: Record<OfferStatus, (shortName: string) => string> =
+  {
+    PENDING: (shortName) => `🔄 На розгляді - ${shortName} `,
+    ACCEPTED: (shortName) => `✅ Прийнято - ${shortName}`,
+    REJECTED: (shortName) => `❌ Відхилено - ${shortName}`,
+  }
+
+export function _generateStatus(
+  offerStatus: Prisma.OfferGetPayload<{
+    select: { shortName: true; status: true }
+  }>[],
+  page: number,
+  pagesCount: number
+) {
+  const statusString = offerStatus
+    .map(({ shortName, status }) => OfferMenuStatusText[status](shortName))
+    .join('\n')
+
+  const statusMessage = `
+    Твої пропозиції ${page + 1}/${pagesCount}:
+
+    ${statusString}
+    
+    `
+  return _deleteCodeIndentation(statusMessage)
 }
