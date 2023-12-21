@@ -14,7 +14,7 @@ export const menuKeyboardLabels = {
 
 export const visitChannelInline = new InlineKeyboard().url(
   'Тицяй',
-  CHANNEL_INVITE_URL
+  CHANNEL_INVITE_URL || ''
 )
 
 export const mainMenuKeyboard = new Keyboard()
