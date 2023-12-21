@@ -17,6 +17,7 @@ const pretikBot = new Bot<PretikContext>(BOT_TOKEN)
 pretikBot.catch((err: BotError) => errorHandler(err))
 
 const fileStorage = new FileAdapter({ dirName: 'sessions' })
+pretikBot.use((ctx, next) => !isChannelUpdate(ctx) && next())
 
 pretikBot.use(
   session({

@@ -17,7 +17,7 @@ import {
   _generateOfferInline,
 } from '../responses.js'
 
-const { ADMIN_TAB_NUMBER } = env
+const { ADMINS_GROUP_ID } = env
 
 const shortNameSchema = z.string().max(70)
 
@@ -81,24 +81,21 @@ export async function handleOfferConversation(
     })
   )
 
-  const adminId = await conversation.external(() =>
-    _getAdminId(ADMIN_TAB_NUMBER)
-  )
   const { fullName, phone } = ctx.session.auth.user.employeeData
 
-  if (!adminId) {
-    return await ctx.reply('Біда: адмін не реєструвався')
+  if (!ADMINS_GROUP_ID) {
+    return await ctx.reply('Біда: нема чату адмінів')
   }
 
   const offerMessage = await ctx.api.sendMessage(
-    adminId,
+    ADMINS_GROUP_ID,
     _renderOfferMessage(ctx.session.offerDraft),
     {
       parse_mode: 'HTML',
       reply_markup: _generateOfferInline(createdOffer.id),
     }
   )
-  await ctx.api.sendContact(adminId, phone || '', fullName, {
+  await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName, {
     reply_to_message_id: offerMessage.message_id,
     disable_notification: true,
   })

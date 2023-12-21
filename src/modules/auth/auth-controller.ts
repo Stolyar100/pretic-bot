@@ -1,12 +1,11 @@
-import { env, loadEnv } from '../../config/env.js'
+import { loadEnv } from '../../config/env.js'
 loadEnv()
-import { Filter, NextFunction } from 'grammy'
+import { NextFunction } from 'grammy'
 import { PretikContext } from '../../types/index.js'
 import { prisma } from '../../prisma/client.js'
 import { register } from './conversations/register-conversation.js'
+import { isPrivateChat } from '../../helpers/filters.js'
 export { register } from './conversations/register-conversation.js'
-
-const { ADMIN_TAB_NUMBER } = env
 
 export async function authentication(ctx: PretikContext, next: NextFunction) {
   const userId = ctx.from?.id
@@ -20,13 +19,16 @@ export async function authentication(ctx: PretikContext, next: NextFunction) {
     include: { employeeData: true },
   })
 
-  if (!user) {
-    await ctx.conversation.enter(register.name)
-    return
+  if (user) {
+    ctx.session.auth = { user: user }
+    return await next()
   }
 
-  ctx.session.auth = { user: user, isAdmin: _isAdmin(user.employeeTabNumber) }
-  await next()
+  if (isPrivateChat(ctx)) {
+    return await ctx.conversation.enter(register.name)
+  }
+
+  await ctx.reply('Напиши боту в особисті, щоб зараєструватися')
 }
 
 function _isUserAuthorized(
@@ -35,9 +37,4 @@ function _isUserAuthorized(
   const isUserAuthorized = !!authSessionData
 
   return isUserAuthorized
-}
-
-function _isAdmin(tabNumber: string): boolean {
-  const isAdmin = tabNumber == ADMIN_TAB_NUMBER
-  return isAdmin
 }

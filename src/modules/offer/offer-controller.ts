@@ -69,7 +69,7 @@ export async function handleOfferCallback(
   try {
     const { data: rawData } = ctx.callbackQuery
     const { id, action } = await _parseOfferData(rawData)
-    const { isAdmin } = ctx.session.auth
+    const { isAdmin } = ctx.session.auth.user.employeeData
 
     if (!isAdmin) {
       await ctx.answerCallbackQuery(requiresAdminText)

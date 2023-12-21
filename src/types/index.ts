@@ -17,7 +17,6 @@ interface SessionData {
 
 interface Auth {
   user: Prisma.UserGetPayload<{ include: { employeeData: true } }>
-  isAdmin: boolean
 }
 
 interface OfferDraft {

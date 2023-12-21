@@ -14,24 +14,34 @@ import {
 import { menuKeyboardLabels } from '../main-menu/main-menu-module.js'
 import { PretikContext } from '../../types/index.js'
 import { offerStatusMenu } from './offer-controller.js'
+import { isPrivateChat } from '../../helpers/filters.js'
 
 const { CONVERSATION_TIMEOUT } = env
 
 const OfferModule = new Composer<PretikContext>()
 
-OfferModule.hears(cancelButtonText, cancelOffer)
+OfferModule.filter(isPrivateChat).hears(cancelButtonText, cancelOffer)
 
-OfferModule.use(
+OfferModule.filter(isPrivateChat).use(
   createConversation(handleOfferConversation, {
     maxMillisecondsToWait: CONVERSATION_TIMEOUT,
   })
 )
 
-OfferModule.use(offerStatusMenu)
+OfferModule.filter(isPrivateChat).use(offerStatusMenu)
 
-OfferModule.hears(menuKeyboardLabels.sendOffer, startOffer)
-OfferModule.hears(menuKeyboardLabels.getStatistic, getStatistic)
-OfferModule.hears(menuKeyboardLabels.getStatus, sendStatusMenu)
+OfferModule.filter(isPrivateChat).hears(
+  menuKeyboardLabels.sendOffer,
+  startOffer
+)
+OfferModule.filter(isPrivateChat).hears(
+  menuKeyboardLabels.getStatistic,
+  getStatistic
+)
+OfferModule.filter(isPrivateChat).hears(
+  menuKeyboardLabels.getStatus,
+  sendStatusMenu
+)
 
 OfferModule.on('callback_query:data', handleOfferCallback)
 
