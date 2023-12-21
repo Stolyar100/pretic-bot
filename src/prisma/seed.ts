@@ -1,22 +1,20 @@
-import { PrismaClient, Employee } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-const testEmployee: Employee[] = [
-  { fullName: 'Oleh', phone: null, tabNumber: '8000' },
-  { fullName: '<Misha>', phone: null, tabNumber: '8001' },
+const testEmployee: Prisma.EmployeeCreateInput[] = [
+  { fullName: 'Oleh', tabNumber: '8000' },
+  { fullName: 'Misha', tabNumber: '8001', isAdmin: true },
+  { fullName: 'Serhiy', tabNumber: '8002', isAdmin: true },
 ]
 
-const createManyEmployees = async (employees: Employee[]) =>
+const createManyEmployees = async (employees: Prisma.EmployeeCreateInput[]) =>
   prisma.employee.createMany({ data: employees })
 
 const main = async () => {
   const createdEmployees = await createManyEmployees(testEmployee)
-  const testUser = await prisma.user.create({
-    data: { id: 480393445, employeeTabNumber: '8000' },
-  })
-  const users = await prisma.user.findMany()
-  console.log(users)
+
+  console.log(createdEmployees)
 }
 
 void main().then(async () => {
