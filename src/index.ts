@@ -9,14 +9,19 @@ import { OfferModule } from './modules/offer/offer-module.js'
 import { errorHandler } from './helpers/errorHandler.js'
 import { hydrate } from '@grammyjs/hydrate'
 import { FileAdapter } from '@grammyjs/storage-file'
+import { isChannelUpdate } from './helpers/filters.js'
+import { UtilsModule } from './modules/utils/utils-module.js'
 
 const { BOT_TOKEN } = env
+
+const fileStorage = new FileAdapter({ dirName: 'sessions' })
 
 const pretikBot = new Bot<PretikContext>(BOT_TOKEN)
 
 pretikBot.catch((err: BotError) => errorHandler(err))
 
-const fileStorage = new FileAdapter({ dirName: 'sessions' })
+pretikBot.use(UtilsModule)
+
 pretikBot.use((ctx, next) => !isChannelUpdate(ctx) && next())
 
 pretikBot.use(
@@ -30,15 +35,12 @@ pretikBot.use(
     },
   })
 )
+
 pretikBot.use(hydrate())
 pretikBot.use(conversations())
 
-pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(AuthModule)
-pretikBot
-  .errorBoundary((err: BotError) => errorHandler(err))
-  .use(MainMenuModule)
-pretikBot.errorBoundary((err: BotError) => errorHandler(err)).use(OfferModule)
-
-pretikBot.command('id', (ctx) => ctx.reply(`${JSON.stringify(ctx.chat)}`))
+pretikBot.use(AuthModule)
+pretikBot.use(MainMenuModule)
+pretikBot.use(OfferModule)
 
 void pretikBot.start()
