@@ -6,6 +6,7 @@ import { sendMenu } from '../../main-menu/main-menu-controller.js'
 const shareNumberKeyboard = new Keyboard()
   .requestContact('Поділитись номером')
   .oneTime()
+  .resized()
 
 export async function register(
   conversation: PretikConversation,
