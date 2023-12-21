@@ -24,6 +24,9 @@ pretikBot.use(
     initial: () => ({
       offerDraft: {},
     }),
+    getSessionKey(ctx) {
+      return ctx.from?.id.toString()
+    },
   })
 )
 pretikBot.use(hydrate())
