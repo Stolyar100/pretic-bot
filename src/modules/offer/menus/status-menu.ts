@@ -33,7 +33,7 @@ export const offerStatusMenu = new Menu<PretikContext>('offer-status-menu')
     const { id } = ctx.session.auth.user
     const { offersPerPage, page, pagesCount } = ctx.session.offerStatus
 
-    if (page == pagesCount) {
+    if (page + 1 == pagesCount) {
       return ctx.answerCallbackQuery(paginationLimitText)
     }
 
