@@ -12,12 +12,6 @@ const departments = [
   'В сусіднє село',
 ] as const
 
-export const departmentKeyboard = Keyboard.from(
-  departments.map((departmentLabel) => [Keyboard.text(departmentLabel)])
-)
-  .resized()
-  .toFlowed(2)
-
 export const cancelButtonText = 'Йой, нє'
 export const editButtonText = 'Йой, шось не то! Вернутись'
 export const submitButtonText = 'Файно є'
@@ -27,6 +21,12 @@ export const editButtonRow = [[Keyboard.text(editButtonText)]]
 export const submitButtonRow = [[Keyboard.text(submitButtonText)]]
 
 export const cancelKeyboard = Keyboard.from(cancelButtonRow).resized()
+export const departmentKeyboard = Keyboard.from(
+  departments.map((departmentLabel) => [Keyboard.text(departmentLabel)])
+)
+  .resized()
+  .toFlowed(2)
+  .append(cancelKeyboard)
 export const editSubmitKeyboard = Keyboard.from([
   ...editButtonRow,
   ...submitButtonRow,

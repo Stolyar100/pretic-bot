@@ -100,7 +100,9 @@ export async function handleOfferConversation(
     disable_notification: true,
   })
 
-  await ctx.reply('Дякую за те, що покращуєш PRET!')
+  await ctx.reply('Дякую за те, що покращуєш PRET!', {
+    reply_markup: { remove_keyboard: true },
+  })
 
   await sendMenu(ctx)
 }
@@ -181,7 +183,7 @@ async function _requestResponsibleDepartment(
   ctx: PretikContext
 ) {
   await ctx.reply('Ну і в чий город цей камінь?', {
-    reply_markup: departmentKeyboard.append(cancelKeyboard),
+    reply_markup: departmentKeyboard,
   })
   const responsibleDepartment = (await conversation.waitFor('message:text'))
     .message.text
