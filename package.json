@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "utils": "node --env-file=.env  build/src/utils-only.js",
     "build": "tsc",
     "clean": "rimraf ./build",
     "dev": "nodemon",

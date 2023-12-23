@@ -25,7 +25,7 @@ export { cancelButtonText } from './responses.js'
 export { handleOfferConversation } from './conversations/handle-offer-conversation.js'
 export { offerStatusMenu } from './menus/status-menu.js'
 
-const { CHANNEL_ID = 0, OFFER_PER_PAGE } = env
+const { CHANNEL_ID, OFFER_PER_PAGE } = env
 
 const offerMenuSchema = z.object({
   name: z.literal('OfferStatus'),

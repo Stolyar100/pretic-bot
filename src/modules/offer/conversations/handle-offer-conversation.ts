@@ -83,10 +83,6 @@ export async function handleOfferConversation(
 
   const { fullName, phone } = ctx.session.auth.user.employeeData
 
-  if (!ADMINS_GROUP_ID) {
-    return await ctx.reply('Біда: нема чату адмінів')
-  }
-
   const offerMessage = await ctx.api.sendMessage(
     ADMINS_GROUP_ID,
     _renderOfferMessage(ctx.session.offerDraft),
