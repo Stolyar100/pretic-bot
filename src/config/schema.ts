@@ -5,7 +5,7 @@ const schema = {
   CHANNEL_ID: Number,
   ADMINS_GROUP_ID: Number,
   CONVERSATION_TIMEOUT: { type: Number, default: 5 * 60 * 1000 },
-  STORAGE_TIMEOUT: { type: Number, default: 6 * 60 * 60 * 1000 },
+  STORAGE_TIMEOUT: { type: Number, default: 20 * 60 * 1000 },
   OFFER_PER_PAGE: { type: Number, default: 5 },
 } as const
 
