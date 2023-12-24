@@ -14,6 +14,7 @@ import {
   offerLimitWarning,
   offerNotFoundText,
   offerRejectedText,
+  offerUpdateNotification,
   requiresAdminText,
 } from './responses.js'
 import {
@@ -77,21 +78,30 @@ export async function handleOfferCallback(
     }
 
     if (action == 'ACCEPT') {
-      const updatedOffer = await prisma.offer.update({
+      const { authorId, shortName } = await prisma.offer.update({
         where: { id: id, status: 'PENDING' },
         data: { status: 'ACCEPTED' },
+        select: { authorId: true, shortName: true },
       })
 
       await ctx.copyMessage(CHANNEL_ID)
-
+      await ctx.api.sendMessage(
+        authorId,
+        offerUpdateNotification['ACCEPTED'](shortName)
+      )
       await ctx.answerCallbackQuery(offerAcceptedText)
     }
     if (action == 'REJECT') {
-      const updatedOffer = await prisma.offer.update({
+      const { authorId, shortName } = await prisma.offer.update({
         where: { id: id, status: 'PENDING' },
         data: { status: 'REJECTED' },
+        select: { authorId: true, shortName: true },
       })
 
+      await ctx.api.sendMessage(
+        authorId,
+        offerUpdateNotification['REJECTED'](shortName)
+      )
       await ctx.answerCallbackQuery(offerRejectedText)
     }
     await ctx.msg?.editReplyMarkup()

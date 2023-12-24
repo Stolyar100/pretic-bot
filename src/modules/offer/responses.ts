@@ -152,3 +152,13 @@ export function _generateStatus(
     `
   return _deleteCodeIndentation(statusMessage)
 }
+
+export const offerUpdateNotification: Record<
+  Exclude<OfferStatus, 'PENDING'>,
+  (shortName: string) => string
+> = {
+  ACCEPTED: (shortName) =>
+    `Привіт! PRETik на зв'язку. Маю новини! Статус твоєї ініціативи «${shortName}» змінився на «Прийнято». Ну ти страшний спеціаліст. Люкс! Давай ще!`,
+  REJECTED: (shortName) =>
+    `Привіт! PRETik на зв'язку. Маю новини! Статус твоєї ініціативи «${shortName}» змінився на «Відхилено».  А най їх качка копне! Фортуна сьогодні повернулась не тим боком, ну нічого, наступного разу пощастить. Все одно, ти – молодець! Вірю в те, що ти ще до мене повернешся! До зустрічі!`,
+}
