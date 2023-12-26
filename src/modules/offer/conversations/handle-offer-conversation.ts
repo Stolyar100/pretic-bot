@@ -91,7 +91,7 @@ export async function handleOfferConversation(
       reply_markup: _generateOfferInline(createdOffer.id),
     }
   )
-  await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName, {
+  await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
     reply_to_message_id: offerMessage.message_id,
     disable_notification: true,
   })

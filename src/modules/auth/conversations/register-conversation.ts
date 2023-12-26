@@ -29,7 +29,7 @@ export async function register(
   while (!employeeName) {
     employeeName = await conversation.external(() =>
       _getUnregisteredEmployee(employeeTabNumber).then(
-        (employee) => employee?.fullName
+        (employee) => employee?.fullName || ''
       )
     )
 
