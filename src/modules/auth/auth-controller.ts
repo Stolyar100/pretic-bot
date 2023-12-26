@@ -28,7 +28,10 @@ export async function authentication(ctx: PretikContext, next: NextFunction) {
     return await ctx.conversation.enter(register.name)
   }
 
-  await ctx.reply('Напиши боту в особисті, щоб зараєструватися')
+  await ctx.reply(
+    `[${ctx.from.first_name}](tg://user?id=${userId}), Напиши боту в особисті, щоб зараєструватися`,
+    { parse_mode: 'MarkdownV2' }
+  )
 }
 
 function _isUserAuthorized(
