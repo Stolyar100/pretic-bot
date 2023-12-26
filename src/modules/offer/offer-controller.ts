@@ -1,7 +1,7 @@
 import { env, loadEnv } from '../../config/env.js'
 loadEnv()
 import { Filter, NextFunction } from 'grammy'
-import { ZodError, z } from 'zod'
+import { ZodError, date, z } from 'zod'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js'
 import { PretikContext } from '../../types/index.js'
 import { sendMenu } from '../main-menu/main-menu-controller.js'
@@ -55,12 +55,17 @@ export async function startOffer(ctx: PretikContext) {
 async function _isLimitReached(userId: number | undefined): Promise<boolean> {
   const todayOfferCount = await prisma.offer.count({
     where: {
-      creationDate: new Date(),
+      creationDate: { gt: _getYesterdayDate() },
       authorId: userId,
     },
   })
 
   return todayOfferCount > 2
+}
+
+function _getYesterdayDate() {
+  const yesterdayDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  return yesterdayDate
 }
 
 export async function handleOfferCallback(
