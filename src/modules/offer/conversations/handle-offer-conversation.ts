@@ -15,9 +15,13 @@ import {
   offerFieldLabels,
   selectOfferFieldKeyboard,
   _generateOfferInline,
+  photoKeyboard,
+  sendPhotoText,
+  skipPhotoText,
 } from '../responses.js'
+import { Context } from 'grammy'
 
-const { ADMINS_GROUP_ID } = env
+const { ADMINS_GROUP_ID, BOT_TOKEN } = env
 
 const shortNameSchema = z.string().max(70)
 
@@ -31,6 +35,7 @@ export async function handleOfferConversation(
     responsibleDepartment: null,
     shortName: null,
     solvesProblem: null,
+    photo: null,
   }
   do {
     if (!_isOfferFieldFilled(ctx, 'shortName')) {
@@ -48,6 +53,9 @@ export async function handleOfferConversation(
     }
     if (!_isOfferFieldFilled(ctx, 'responsibleDepartment')) {
       await _requestResponsibleDepartment(conversation, ctx)
+    }
+    if (!_isOfferFieldFilled(ctx, 'photo')) {
+      await _requestPhoto(conversation, ctx)
     }
 
     await ctx.reply('Шо, полетіли?', {
@@ -83,18 +91,36 @@ export async function handleOfferConversation(
 
   const { fullName, phone } = ctx.session.auth.user.employeeData
 
-  const offerMessage = await ctx.api.sendMessage(
-    ADMINS_GROUP_ID,
-    _renderOfferMessage(ctx.session.offerDraft),
-    {
-      parse_mode: 'HTML',
-      reply_markup: _generateOfferInline(createdOffer.id),
-    }
-  )
-  await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
-    reply_to_message_id: offerMessage.message_id,
-    disable_notification: true,
-  })
+  if (ctx.session.offerDraft.photo == '') {
+    const offerMessage = await ctx.api.sendMessage(
+      ADMINS_GROUP_ID,
+      _renderOfferMessage(ctx.session.offerDraft),
+      {
+        parse_mode: 'HTML',
+        reply_markup: _generateOfferInline(createdOffer.id),
+      }
+    )
+    await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
+      reply_to_message_id: offerMessage.message_id,
+      disable_notification: true,
+    })
+  } else {
+    const offerPhotoMessage = await ctx.api
+      .sendPhoto(ADMINS_GROUP_ID, ctx.session.offerDraft.photo || '', {
+        caption: _renderOfferMessage(ctx.session.offerDraft),
+        parse_mode: 'HTML',
+        reply_markup: _generateOfferInline(createdOffer.id),
+      })
+      .catch((err) =>
+        ctx.reply(
+          'Тут такі пироги: Якщо надсилати знимку, телеграм не дає прикріпити більше 1024 символів'
+        )
+      )
+    await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
+      reply_to_message_id: offerPhotoMessage.message_id,
+      disable_notification: true,
+    })
+  }
 
   await ctx.reply('Дякую за те, що покращуєш PRET!', {
     reply_markup: { remove_keyboard: true },
@@ -185,6 +211,30 @@ async function _requestResponsibleDepartment(
     .message.text
 
   ctx.session.offerDraft.responsibleDepartment = responsibleDepartment
+}
+
+async function _requestPhoto(
+  conversation: PretikConversation,
+  ctx: PretikContext
+) {
+  await ctx.reply('Хочеш додати знимку?', {
+    reply_markup: photoKeyboard,
+  })
+  const sendOrSkip = await conversation.form.select([
+    sendPhotoText,
+    skipPhotoText,
+  ])
+
+  if (sendOrSkip == skipPhotoText) {
+    return (ctx.session.offerDraft.photo = '')
+  }
+
+  await ctx.reply('Файно, надсилай одну знимку')
+
+  const photoFileId =
+    (await conversation.waitFor(':photo')).msg.photo.pop()?.file_id || ''
+
+  ctx.session.offerDraft.photo = photoFileId
 }
 
 async function _selectFieldToEdit(

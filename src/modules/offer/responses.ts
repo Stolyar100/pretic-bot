@@ -16,6 +16,9 @@ export const cancelButtonText = 'Йой, нє'
 export const editButtonText = 'Йой, шось не то! Вернутись'
 export const submitButtonText = 'Файно є'
 
+export const sendPhotoText = 'Йой, най буде'
+export const skipPhotoText = 'Ні, все файно'
+
 export const cancelButtonRow = [[Keyboard.text(cancelButtonText)]]
 export const editButtonRow = [[Keyboard.text(editButtonText)]]
 export const submitButtonRow = [[Keyboard.text(submitButtonText)]]
@@ -27,6 +30,7 @@ export const departmentKeyboard = Keyboard.from(
   .resized()
   .toFlowed(2)
   .append(cancelKeyboard)
+
 export const editSubmitKeyboard = Keyboard.from([
   ...editButtonRow,
   ...submitButtonRow,
@@ -35,12 +39,19 @@ export const editSubmitKeyboard = Keyboard.from([
   .toFlowed(2)
   .append(cancelKeyboard)
 
+export const photoKeyboard = new Keyboard()
+  .text(sendPhotoText)
+  .text(skipPhotoText)
+  .resized()
+  .oneTime()
+
 export const offerDraftMap: PretikContext['session']['offerDraft'] = {
   content: 'Зміст',
   reasons: 'Передумови',
   responsibleDepartment: 'В чий город',
   shortName: 'Коротка назва',
   solvesProblem: 'Вирішує проблему',
+  photo: 'Знимка',
 } as const
 
 export const offerFieldLabels = Object.values(offerDraftMap)
@@ -60,7 +71,7 @@ export function _renderOfferMessage(
 ) {
   const offerMessage = `
       Пропозиція📥 
-  
+
       <b><i>${offerDraft.shortName}</i></b>
   
       <b>Передумови/причини/обгрунтування:</b> 
