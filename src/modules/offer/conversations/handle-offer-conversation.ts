@@ -29,49 +29,7 @@ export async function handleOfferConversation(
   conversation: PretikConversation,
   ctx: PretikContext
 ) {
-  ctx.session.offerDraft = {
-    content: null,
-    reasons: null,
-    responsibleDepartment: null,
-    shortName: null,
-    solvesProblem: null,
-    photo: null,
-  }
-  do {
-    if (!_isOfferFieldFilled(ctx, 'shortName')) {
-      await _requestShortName(conversation, ctx)
-    }
-    if (!_isOfferFieldFilled(ctx, 'reasons')) {
-      await _requestReasons(conversation, ctx)
-    }
-    if (!_isOfferFieldFilled(ctx, 'solvesProblem')) {
-      await _requestSolvesProblem(conversation, ctx)
-    }
-
-    if (!_isOfferFieldFilled(ctx, 'content')) {
-      await _requestContent(conversation, ctx)
-    }
-    if (!_isOfferFieldFilled(ctx, 'responsibleDepartment')) {
-      await _requestResponsibleDepartment(conversation, ctx)
-    }
-    if (!_isOfferFieldFilled(ctx, 'photo')) {
-      await _requestPhoto(conversation, ctx)
-    }
-
-    await ctx.reply('Шо, полетіли?', {
-      reply_markup: editSubmitKeyboard,
-    })
-    const editSubmitResponse = await conversation.form.select([
-      editButtonText,
-      submitButtonText,
-    ])
-
-    if (editSubmitResponse == submitButtonText) {
-      break
-    }
-
-    await _selectFieldToEdit(conversation, ctx)
-  } while (!_isOfferFilled(ctx.session.offerDraft))
+  await _fillOffer(conversation, ctx)
 
   const shortName = ctx.session.offerDraft.shortName
   const authorId = ctx.from?.id
@@ -127,6 +85,55 @@ export async function handleOfferConversation(
   })
 
   await sendMenu(ctx)
+}
+
+async function _fillOffer(
+  conversation: PretikConversation,
+  ctx: PretikContext
+) {
+  ctx.session.offerDraft = {
+    content: null,
+    reasons: null,
+    responsibleDepartment: null,
+    shortName: null,
+    solvesProblem: null,
+    fileId: null,
+  }
+  do {
+    if (!_isOfferFieldFilled(ctx, 'shortName')) {
+      await _requestShortName(conversation, ctx)
+    }
+    if (!_isOfferFieldFilled(ctx, 'reasons')) {
+      await _requestReasons(conversation, ctx)
+    }
+    if (!_isOfferFieldFilled(ctx, 'solvesProblem')) {
+      await _requestSolvesProblem(conversation, ctx)
+    }
+
+    if (!_isOfferFieldFilled(ctx, 'content')) {
+      await _requestContent(conversation, ctx)
+    }
+    if (!_isOfferFieldFilled(ctx, 'responsibleDepartment')) {
+      await _requestResponsibleDepartment(conversation, ctx)
+    }
+    if (!_isOfferFieldFilled(ctx, 'fileId')) {
+      await _requestPhoto(conversation, ctx)
+    }
+
+    await ctx.reply('Шо, полетіли?', {
+      reply_markup: editSubmitKeyboard,
+    })
+    const editSubmitResponse = await conversation.form.select([
+      editButtonText,
+      submitButtonText,
+    ])
+
+    if (editSubmitResponse == submitButtonText) {
+      break
+    }
+
+    await _selectFieldToEdit(conversation, ctx)
+  } while (!_isOfferFilled(ctx.session.offerDraft))
 }
 
 function _isOfferFieldFilled(
