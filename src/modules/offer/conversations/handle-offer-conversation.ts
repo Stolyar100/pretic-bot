@@ -19,9 +19,8 @@ import {
   sendPhotoText,
   skipPhotoText,
 } from '../responses.js'
-import { Context } from 'grammy'
 
-const { ADMINS_GROUP_ID, BOT_TOKEN } = env
+const { ADMINS_GROUP_ID } = env
 
 const shortNameSchema = z.string().max(70)
 
@@ -32,6 +31,7 @@ export async function handleOfferConversation(
   await _fillOffer(conversation, ctx)
 
   const shortName = ctx.session.offerDraft.shortName
+  const fileId = ctx.session.offerDraft.fileId
   const authorId = ctx.from?.id
 
   if (!shortName || !authorId) {
@@ -43,42 +43,31 @@ export async function handleOfferConversation(
       data: {
         shortName,
         authorId,
+        fileId,
       },
     })
   )
 
   const { fullName, phone } = ctx.session.auth.user.employeeData
 
-  if (ctx.session.offerDraft.photo == '') {
-    const offerMessage = await ctx.api.sendMessage(
-      ADMINS_GROUP_ID,
-      _renderOfferMessage(ctx.session.offerDraft),
-      {
-        parse_mode: 'HTML',
-        reply_markup: _generateOfferInline(createdOffer.id),
-      }
-    )
-    await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
+  const offerMessage = await ctx.api.sendMessage(
+    ADMINS_GROUP_ID,
+    _renderOfferMessage(ctx.session.offerDraft),
+    {
+      parse_mode: 'HTML',
+      reply_markup: _generateOfferInline(createdOffer.id),
+    }
+  )
+  if (ctx.session.offerDraft.fileId) {
+    await ctx.api.sendDocument(ADMINS_GROUP_ID, ctx.session.offerDraft.fileId, {
       reply_to_message_id: offerMessage.message_id,
-      disable_notification: true,
-    })
-  } else {
-    const offerPhotoMessage = await ctx.api
-      .sendPhoto(ADMINS_GROUP_ID, ctx.session.offerDraft.photo || '', {
-        caption: _renderOfferMessage(ctx.session.offerDraft),
-        parse_mode: 'HTML',
-        reply_markup: _generateOfferInline(createdOffer.id),
-      })
-      .catch((err) =>
-        ctx.reply(
-          'Тут такі пироги: Якщо надсилати знимку, телеграм не дає прикріпити більше 1024 символів'
-        )
-      )
-    await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
-      reply_to_message_id: offerPhotoMessage.message_id,
-      disable_notification: true,
     })
   }
+
+  await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
+    reply_to_message_id: offerMessage.message_id,
+    disable_notification: true,
+  })
 
   await ctx.reply('Дякую за те, що покращуєш PRET!', {
     reply_markup: { remove_keyboard: true },
@@ -117,7 +106,7 @@ async function _fillOffer(
       await _requestResponsibleDepartment(conversation, ctx)
     }
     if (!_isOfferFieldFilled(ctx, 'fileId')) {
-      await _requestPhoto(conversation, ctx)
+      await _requestFile(conversation, ctx)
     }
 
     await ctx.reply('Шо, полетіли?', {
@@ -220,11 +209,11 @@ async function _requestResponsibleDepartment(
   ctx.session.offerDraft.responsibleDepartment = responsibleDepartment
 }
 
-async function _requestPhoto(
+async function _requestFile(
   conversation: PretikConversation,
   ctx: PretikContext
 ) {
-  await ctx.reply('Хочеш додати знимку?', {
+  await ctx.reply('Хочеш додати знимку/писульку?', {
     reply_markup: photoKeyboard,
   })
   const sendOrSkip = await conversation.form.select([
@@ -233,15 +222,16 @@ async function _requestPhoto(
   ])
 
   if (sendOrSkip == skipPhotoText) {
-    return (ctx.session.offerDraft.photo = '')
+    return (ctx.session.offerDraft.fileId = '')
   }
 
-  await ctx.reply('Файно, надсилай одну знимку')
+  await ctx.reply('Файно, надсилай 1 файл')
 
-  const photoFileId =
-    (await conversation.waitFor(':photo')).msg.photo.pop()?.file_id || ''
+  const fileMessage = (await conversation.waitFor(':document')).msg
 
-  ctx.session.offerDraft.photo = photoFileId
+  const fileId = fileMessage.document.file_id
+
+  ctx.session.offerDraft.fileId = fileId
 }
 
 async function _selectFieldToEdit(

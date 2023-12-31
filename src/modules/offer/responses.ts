@@ -51,7 +51,7 @@ export const offerDraftMap: PretikContext['session']['offerDraft'] = {
   responsibleDepartment: 'В чий город',
   shortName: 'Коротка назва',
   solvesProblem: 'Вирішує проблему',
-  photo: 'Знимка',
+  fileId: 'Знимка',
 } as const
 
 export const offerFieldLabels = Object.values(offerDraftMap)
@@ -100,16 +100,16 @@ export const offerRejectedText = 'Йой, геть тото'
 const offerAcceptText = 'Публікувати'
 const offerRejectText = 'Відхилити'
 
-export function _generateOfferInline(offerId: offerMenuData['id']) {
+export function _generateOfferInline(offerId: offerMenuData['p']) {
   const acceptData: offerMenuData = {
-    id: offerId,
-    name: 'OfferStatus',
-    action: 'ACCEPT',
+    k: 0,
+    p: offerId,
+    b: 0,
   }
   const rejectData: offerMenuData = {
-    id: offerId,
-    name: 'OfferStatus',
-    action: 'REJECT',
+    k: 0,
+    p: offerId,
+    b: 1,
   }
 
   const acceptButtonPayload = JSON.stringify(acceptData)

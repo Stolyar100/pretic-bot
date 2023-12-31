@@ -29,9 +29,9 @@ export { offerStatusMenu } from './menus/status-menu.js'
 const { CHANNEL_ID, OFFER_PER_PAGE } = env
 
 const offerMenuSchema = z.object({
-  name: z.literal('OfferStatus'),
-  id: z.number(),
-  action: z.enum(['REJECT', 'ACCEPT']),
+  k: z.literal(0),
+  p: z.number(),
+  b: z.number(),
 })
 
 export type offerMenuData = z.infer<typeof offerMenuSchema>
@@ -74,7 +74,7 @@ export async function handleOfferCallback(
 ) {
   try {
     const { data: rawData } = ctx.callbackQuery
-    const { id, action } = await _parseOfferData(rawData)
+    const { b: buttonNumber, p: offerId } = await _parseOfferData(rawData)
     const { isAdmin } = ctx.session.auth.user.employeeData
 
     if (!isAdmin) {
@@ -82,23 +82,28 @@ export async function handleOfferCallback(
       return
     }
 
-    if (action == 'ACCEPT') {
-      const { authorId, shortName } = await prisma.offer.update({
-        where: { id: id, status: 'PENDING' },
+    if (buttonNumber == 0) {
+      const { authorId, fileId, shortName } = await prisma.offer.update({
+        where: { id: offerId, status: 'PENDING' },
         data: { status: 'ACCEPTED' },
-        select: { authorId: true, shortName: true },
+        select: { authorId: true, shortName: true, fileId: true },
       })
 
-      await ctx.copyMessage(CHANNEL_ID)
+      const offerPost = await ctx.copyMessage(CHANNEL_ID)
+      if (fileId) {
+        await ctx.api.sendDocument(CHANNEL_ID, fileId, {
+          reply_to_message_id: offerPost.message_id,
+        })
+      }
       await ctx.api.sendMessage(
         authorId,
         offerUpdateNotification['ACCEPTED'](shortName)
       )
       await ctx.answerCallbackQuery(offerAcceptedText)
     }
-    if (action == 'REJECT') {
+    if (buttonNumber == 1) {
       const { authorId, shortName } = await prisma.offer.update({
-        where: { id: id, status: 'PENDING' },
+        where: { id: offerId, status: 'PENDING' },
         data: { status: 'REJECTED' },
         select: { authorId: true, shortName: true },
       })
