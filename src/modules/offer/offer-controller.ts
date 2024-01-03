@@ -1,7 +1,7 @@
 import { env, loadEnv } from '../../config/env.js'
 loadEnv()
 import { Filter, NextFunction } from 'grammy'
-import { ZodError, date, z } from 'zod'
+import { ZodError, z } from 'zod'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js'
 import { PretikContext } from '../../types/index.js'
 import { sendMenu } from '../main-menu/main-menu-controller.js'
@@ -26,7 +26,7 @@ export { cancelButtonText } from './responses.js'
 export { handleOfferConversation } from './conversations/handle-offer-conversation.js'
 export { offerStatusMenu } from './menus/status-menu.js'
 
-const { CHANNEL_ID, OFFER_PER_PAGE } = env
+const { CHANNEL_ID, ADMINS_GROUP_ID, OFFER_PER_PAGE } = env
 
 const offerMenuSchema = z.object({
   k: z.literal(0),
@@ -83,16 +83,17 @@ export async function handleOfferCallback(
     }
 
     if (buttonNumber == 0) {
-      const { authorId, fileId, shortName } = await prisma.offer.update({
+      const { authorId, fileMsgId, shortName } = await prisma.offer.update({
         where: { id: offerId, status: 'PENDING' },
         data: { status: 'ACCEPTED' },
-        select: { authorId: true, shortName: true, fileId: true },
+        select: { authorId: true, shortName: true, fileMsgId: true },
       })
 
       const offerPost = await ctx.copyMessage(CHANNEL_ID)
-      if (fileId) {
-        await ctx.api.sendDocument(CHANNEL_ID, fileId, {
+      if (fileMsgId) {
+        await ctx.api.copyMessage(CHANNEL_ID, ADMINS_GROUP_ID, fileMsgId, {
           reply_to_message_id: offerPost.message_id,
+          disable_notification: true,
         })
       }
       await ctx.api.sendMessage(

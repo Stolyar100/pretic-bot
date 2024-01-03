@@ -25,7 +25,7 @@ interface OfferDraft {
   content: string | null
   solvesProblem: string | null
   responsibleDepartment: string | null
-  fileId: string | null
+  fileMessageId: number | null
 }
 
 interface OfferStatusMenu {

@@ -30,8 +30,7 @@ export async function handleOfferConversation(
 ) {
   await _fillOffer(conversation, ctx)
 
-  const shortName = ctx.session.offerDraft.shortName
-  const fileId = ctx.session.offerDraft.fileId
+  const { shortName, fileMessageId } = ctx.session.offerDraft
   const authorId = ctx.from?.id
 
   if (!shortName || !authorId) {
@@ -43,7 +42,7 @@ export async function handleOfferConversation(
       data: {
         shortName,
         authorId,
-        fileId,
+        fileMsgId: fileMessageId,
       },
     })
   )
@@ -58,10 +57,23 @@ export async function handleOfferConversation(
       reply_markup: _generateOfferInline(createdOffer.id),
     }
   )
-  if (ctx.session.offerDraft.fileId) {
-    await ctx.api.sendDocument(ADMINS_GROUP_ID, ctx.session.offerDraft.fileId, {
-      reply_to_message_id: offerMessage.message_id,
-    })
+  if (fileMessageId) {
+    const fileSentMessage = await ctx.api.copyMessage(
+      ADMINS_GROUP_ID,
+      authorId,
+      fileMessageId,
+
+      {
+        reply_to_message_id: offerMessage.message_id,
+        disable_notification: true,
+      }
+    )
+    const updatedOffer = await conversation.external(() =>
+      prisma.offer.update({
+        where: { id: createdOffer.id },
+        data: { fileMsgId: fileSentMessage.message_id },
+      })
+    )
   }
 
   await ctx.api.sendContact(ADMINS_GROUP_ID, phone || '', fullName || '', {
@@ -86,7 +98,7 @@ async function _fillOffer(
     responsibleDepartment: null,
     shortName: null,
     solvesProblem: null,
-    fileId: null,
+    fileMessageId: null,
   }
   do {
     if (!_isOfferFieldFilled(ctx, 'shortName')) {
@@ -105,7 +117,7 @@ async function _fillOffer(
     if (!_isOfferFieldFilled(ctx, 'responsibleDepartment')) {
       await _requestResponsibleDepartment(conversation, ctx)
     }
-    if (!_isOfferFieldFilled(ctx, 'fileId')) {
+    if (!_isOfferFieldFilled(ctx, 'fileMessageId')) {
       await _requestFile(conversation, ctx)
     }
 
@@ -222,16 +234,16 @@ async function _requestFile(
   ])
 
   if (sendOrSkip == skipPhotoText) {
-    return (ctx.session.offerDraft.fileId = '')
+    return (ctx.session.offerDraft.fileMessageId = null)
   }
 
   await ctx.reply('Файно, надсилай 1 файл')
 
-  const fileMessage = (await conversation.waitFor(':document')).msg
+  const fileMessage = (
+    await conversation.waitFor([':document', ':photo', ':video'])
+  ).msg
 
-  const fileId = fileMessage.document.file_id
-
-  ctx.session.offerDraft.fileId = fileId
+  ctx.session.offerDraft.fileMessageId = fileMessage.message_id
 }
 
 async function _selectFieldToEdit(

@@ -31,7 +31,7 @@ model Offer {
   id           Int         @id @default(autoincrement()) @map("Id")
   shortName    String      @map("ShortName") @db.VarChar(70)
   authorId     Int         @map("AuthorId")
-  fileId       String?     @map("FileId")
+  fileMsgId    Int?        @map("FileMsgId")
   creationDate DateTime    @default(now()) @map("CreationDate") @db.Timestamp(6)
   status       OfferStatus @default(PENDING) @map("Status")
   Author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)

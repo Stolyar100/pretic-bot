@@ -45,13 +45,15 @@ export const photoKeyboard = new Keyboard()
   .resized()
   .oneTime()
 
-export const offerDraftMap: PretikContext['session']['offerDraft'] = {
+export const offerDraftMap: {
+  [Label in keyof PretikContext['session']['offerDraft']]: string
+} = {
   content: 'Зміст',
   reasons: 'Передумови',
   responsibleDepartment: 'В чий город',
   shortName: 'Коротка назва',
   solvesProblem: 'Вирішує проблему',
-  fileId: 'Знимка',
+  fileMessageId: 'Знимка',
 } as const
 
 export const offerFieldLabels = Object.values(offerDraftMap)
